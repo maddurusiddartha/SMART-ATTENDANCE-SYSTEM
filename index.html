@@ -239,43 +239,25 @@ function generateAttendance() {
     document.getElementById("downloadBtn").classList.remove("hidden");
 }
 function downloadPDF() {
-    const content = document.getElementById("output");
+    const element = document.getElementById("output");
 
-    if (!content || content.innerHTML.trim() === "") {
+    if (!element || element.innerHTML.trim() === "") {
         alert("Please generate attendance sheet first.");
         return;
     }
 
-    const printWindow = window.open("", "", "width=900,height=650");
-
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Attendance Sheet</title>
-            <style>
-                body { font-family: Arial; padding: 20px; }
-                table { width: 100%; border-collapse: collapse; }
-                th, td { border: 1px solid #000; padding: 8px; text-align: center; }
-                th { background: #1e3c72; color: white; }
-                .absent { color: red; font-weight: bold; }
-                .present { color: green; font-weight: bold; }
-            </style>
-        </head>
-        <body>
-            ${content.innerHTML}
-        </body>
-        </html>
-    `);
-
-    printWindow.document.close();
-    printWindow.focus();
-
-    printWindow.print();   // ⬅ Save as PDF
-    printWindow.close();
+    html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save('attendance.pdf');
+    });
 }
-
-
 </script>
 
 </body>
 </html>
+
