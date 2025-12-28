@@ -118,6 +118,41 @@
     .search {
         margin-top: 10px;
     }
+    /* ---------- PDF ONLY STYLES ---------- */
+@media print {
+    body {
+        background: white !important;
+    }
+
+    .container {
+        box-shadow: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+
+    h3 {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    table {
+        font-size: 12px;
+    }
+
+    th, td {
+        padding: 6px;
+    }
+
+    .absent {
+        color: red !important;
+    }
+
+    .present {
+        color: green !important;
+    }
+}
+
 </style>
 </head>
 
@@ -152,8 +187,11 @@
     <div class="roll-box" id="rollBox"></div>
     <button onclick="generateAttendance()">Generate Attendance Sheet</button>
 </div>
+<div id="output">
+  <div id="pdfContent"></div>
+</div>
 
-<div id="output"></div>
+
 
 
 <button id="downloadBtn" class="hidden" onclick="downloadPDF()">Download PDF</button>
@@ -222,7 +260,7 @@ function generateAttendance() {
         </tr>`;
     });
 
-    document.getElementById("output").innerHTML = `
+    document.getElementById("pdfContent").innerHTML = `
     <h3>Attendance Sheet</h3>
     <p><strong>Class:</strong> ${className}</p>
     <p><strong>Date:</strong> ${date}</p>
@@ -239,7 +277,7 @@ function generateAttendance() {
     document.getElementById("downloadBtn").classList.remove("hidden");
 }
     function downloadPDF() {
-    const element = document.getElementById("output");
+    const element = document.getElementById("pdfContent");
 
     if (!element || element.innerHTML.trim() === "") {
         alert("Please generate attendance sheet first.");
@@ -264,6 +302,7 @@ function generateAttendance() {
 
 </body>
 </html>
+
 
 
 
