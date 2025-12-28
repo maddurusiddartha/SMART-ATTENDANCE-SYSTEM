@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Smart Attendance System</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 
 
 
@@ -275,36 +277,42 @@ function generateAttendance() {
     `;
 
     document.getElementById("downloadBtn").classList.remove("hidden");
-}
-   function downloadPDF() {
+}async function downloadPDF() {
     const element = document.getElementById("pdfContent");
 
     if (!element || element.innerHTML.trim() === "") {
-        alert("Please generate attendance sheet first.");
+        alert("Please generate attendance sheet first");
         return;
     }
 
-    const opt = {
-        margin: 10,
-        filename: 'attendance.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            onclone: function (clonedDoc) {
-                // 🔥 FIX: remove flex only for PDF rendering
-                clonedDoc.body.style.display = 'block';
-            }
-        },
-        jsPDF: {
-            unit: 'mm',
-            format: 'a4',
-            orientation: 'portrait'
-        }
-    };
+    const { jsPDF } = window.jspdf;
 
-    html2pdf().set(opt).from(element).save();
+    // Render HTML to canvas
+    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+    }
+
+    pdf.save("attendance.pdf");
 }
 
 
@@ -312,6 +320,7 @@ function generateAttendance() {
 
 </body>
 </html>
+
 
 
 
