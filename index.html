@@ -188,7 +188,7 @@
     <button onclick="generateAttendance()">Generate Attendance Sheet</button>
 </div>
 <div id="output">
-  <div id="pdfContent"></div>
+ 
 </div>
 
 
@@ -260,7 +260,7 @@ function generateAttendance() {
         </tr>`;
     });
 
-    document.getElementById("pdfContent").innerHTML = `
+    document.getElementById("output").innerHTML = `
     <h3>Attendance Sheet</h3>
     <p><strong>Class:</strong> ${className}</p>
     <p><strong>Date:</strong> ${date}</p>
@@ -318,6 +318,7 @@ function generateAttendance() {
 
 </body>
 </html>
+
 
 
 
