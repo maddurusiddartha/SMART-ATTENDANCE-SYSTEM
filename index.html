@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <title>Smart Attendance System</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.min.js"></script>
+
 
 
 
@@ -249,9 +250,8 @@ function downloadPDF() {
     html2canvas(element, { scale: 2 }).then(canvas => {
         const imgData = canvas.toDataURL("image/png");
 
-        const { jsPDF } = window.jspdf;   // 🔥 THIS LINE WAS MISSING
-
         const pdf = new jsPDF("p", "mm", "a4");
+
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
@@ -264,6 +264,7 @@ function downloadPDF() {
 
 </body>
 </html>
+
 
 
 
