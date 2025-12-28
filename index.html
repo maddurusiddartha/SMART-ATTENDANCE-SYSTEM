@@ -276,7 +276,7 @@ function generateAttendance() {
 
     document.getElementById("downloadBtn").classList.remove("hidden");
 }
-    function downloadPDF() {
+   function downloadPDF() {
     const element = document.getElementById("pdfContent");
 
     if (!element || element.innerHTML.trim() === "") {
@@ -285,23 +285,34 @@ function generateAttendance() {
     }
 
     const opt = {
-        margin:       10,
-        filename:     'attendance.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        margin: 10,
+        filename: 'attendance.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            onclone: function (clonedDoc) {
+                // 🔥 FIX: remove flex only for PDF rendering
+                clonedDoc.body.style.display = 'block';
+            }
+        },
+        jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait'
+        }
     };
 
-    html2pdf()
-        .set(opt)
-        .from(element)
-        .save();
+    html2pdf().set(opt).from(element).save();
 }
+
 
 </script>
 
 </body>
 </html>
+
 
 
 
