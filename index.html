@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart Attendance System</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(120deg, #1e3c72, #2a5298);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #333;
+    }
+
+    .container {
+        background: #fff;
+        padding: 25px;
+        width: 90%;
+        max-width: 900px;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #1e3c72;
+    }
+
+    label {
+        font-weight: bold;
+        margin-top: 10px;
+        display: block;
+    }
+
+    input, select, button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 6px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 15px;
+    }
+
+    button {
+        background: #1e3c72;
+        color: white;
+        border: none;
+        cursor: pointer;
+        margin-top: 15px;
+    }
+
+    button:hover {
+        background: #16315f;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .roll-box {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+    margin-top: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+.roll-box label {
+    display: block;
+    width: 100%;
+}
+
+
+
+    .roll-box label {
+        font-weight: normal;
+        background: #f1f1f1;
+        padding: 6px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: center;
+    }
+
+    th {
+        background: #1e3c72;
+        color: white;
+    }
+
+    .absent {
+        color: red;
+        font-weight: bold;
+    }
+
+    .present {
+        color: green;
+        font-weight: bold;
+    }
+
+    .search {
+        margin-top: 10px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>Smart Attendance System</h1>
+
+<label>Class / Section Name</label>
+<input id="className" placeholder="Ex: CSE 3rd Year A">
+
+<label>Date</label>
+<input type="date" id="date">
+
+<label>Roll Number Prefix</label>
+<input id="prefix" placeholder="Ex: 23G31A05">
+
+<label>Total Students</label>
+<input type="number" id="strength">
+
+<label>How do you want to mark attendance?</label>
+<select id="mode">
+    <option value="">-- Select --</option>
+    <option value="absent">Mark Absentees (if absentees are few)</option>
+    <option value="present">Mark Presentees (if presentees are few)</option>
+</select>
+
+<button onclick="generateRolls()">Generate Roll Numbers</button>
+
+<div id="markingSection" class="hidden">
+    <input class="search" id="search" placeholder="Search roll number..." onkeyup="searchRolls()">
+    <div class="roll-box" id="rollBox"></div>
+    <button onclick="generateAttendance()">Generate Attendance Sheet</button>
+</div>
+
+<div id="output"></div>
+
+
+<button id="downloadBtn" class="hidden" onclick="downloadPDF()">Download PDF</button>
+
+
+</div>
+
+<script>
+let rolls = [];
+
+function generateRolls() {
+    const strength = Number(document.getElementById("strength").value);
+    const prefix = document.getElementById("prefix").value;
+    const mode = document.getElementById("mode").value;
+
+    if (!strength || !prefix || !mode) {
+        alert("Please fill all details properly");
+        return;
+    }
+
+    rolls = [];
+    const rollBox = document.getElementById("rollBox");
+    rollBox.innerHTML = "";
+
+    for (let i = 1; i <= strength; i++) {
+        const roll = prefix + String(i).padStart(2, "0");
+        rolls.push(roll);
+
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="checkbox" value="${roll}"> ${roll}`;
+        rollBox.appendChild(label);
+    }
+
+    document.getElementById("markingSection").classList.remove("hidden");
+}
+
+function searchRolls() {
+    const value = document.getElementById("search").value.toLowerCase();
+    document.querySelectorAll("#rollBox label").forEach(label => {
+        label.style.display = label.innerText.toLowerCase().includes(value) ? "" : "none";
+    });
+}
+
+function generateAttendance() {
+    const className = document.getElementById("className").value;
+    const date = document.getElementById("date").value;
+    const mode = document.getElementById("mode").value;
+
+    let selected = Array.from(document.querySelectorAll("#rollBox input:checked"))
+                        .map(cb => cb.value);
+
+    let rows = "";
+
+    rolls.forEach(roll => {
+        let status;
+        if (mode === "absent") {
+            status = selected.includes(roll) ? "Absent" : "Present";
+        } else {
+            status = selected.includes(roll) ? "Present" : "Absent";
+        }
+
+        rows += `
+        <tr>
+            <td>${roll}</td>
+            <td class="${status === 'Absent' ? 'absent' : 'present'}">${status}</td>
+        </tr>`;
+    });
+
+    document.getElementById("output").innerHTML = `
+    <h3>Attendance Sheet</h3>
+    <p><strong>Class:</strong> ${className}</p>
+    <p><strong>Date:</strong> ${date}</p>
+
+    <table>
+        <tr>
+            <th>Roll Number</th>
+            <th>Attendance</th>
+        </tr>
+        ${rows}
+    </table>
+    `;
+
+    document.getElementById("downloadBtn").classList.remove("hidden");
+}
+function downloadPDF() {
+    const content = document.getElementById("output");
+
+    if (!content || content.innerHTML.trim() === "") {
+        alert("Please generate attendance sheet first.");
+        return;
+    }
+
+    const printWindow = window.open("", "", "width=900,height=650");
+
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Attendance Sheet</title>
+            <style>
+                body { font-family: Arial; padding: 20px; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { border: 1px solid #000; padding: 8px; text-align: center; }
+                th { background: #1e3c72; color: white; }
+                .absent { color: red; font-weight: bold; }
+                .present { color: green; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            ${content.innerHTML}
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+
+    printWindow.print();   // ⬅ Save as PDF
+    printWindow.close();
+}
+
+
+</script>
+
+</body>
+</html>
