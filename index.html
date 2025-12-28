@@ -237,46 +237,34 @@ function generateAttendance() {
     `;
 
     document.getElementById("downloadBtn").classList.remove("hidden");
-}function downloadPDF() {
-    const content = document.getElementById("output");
+}
+    function downloadPDF() {
+    const element = document.getElementById("output");
 
-    if (!content || content.innerHTML.trim() === "") {
+    if (!element || element.innerHTML.trim() === "") {
         alert("Please generate attendance sheet first.");
         return;
     }
 
-    const printWindow = window.open("", "", "width=900,height=650");
+    const opt = {
+        margin:       10,
+        filename:     'attendance.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
 
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Attendance Sheet</title>
-            <style>
-                body { font-family: Arial; padding: 20px; }
-                table { width: 100%; border-collapse: collapse; }
-                th, td { border: 1px solid #000; padding: 8px; text-align: center; }
-                th { background: #1e3c72; color: white; }
-                .absent { color: red; font-weight: bold; }
-                .present { color: green; font-weight: bold; }
-            </style>
-        </head>
-        <body>
-            ${content.innerHTML}
-        </body>
-        </html>
-    `);
-
-    printWindow.document.close();
-    printWindow.focus();
-
-    printWindow.print();   // ⬅ Save as PDF
-    printWindow.close();
+    html2pdf()
+        .set(opt)
+        .from(element)
+        .save();
 }
 
 </script>
 
 </body>
 </html>
+
 
 
 
